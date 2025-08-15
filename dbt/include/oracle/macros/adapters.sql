@@ -71,7 +71,7 @@
   {%- endif -%}
   {%- call statement('create_schema') -%}
     -- Noop for not breaking tests, oracle
-    -- schemas are actualy users, we can't
+    -- schemas are actually users, we can't
     -- create it here
     select 'a' from dual
   {%- endcall -%}
@@ -421,4 +421,14 @@
     {% set results = run_query("select SYS_CONTEXT('userenv', 'DB_NAME') FROM DUAL") %}
     {% set db_name = results.columns[0].values()[0] %}
     {{ return(db_name) }}
+{% endmacro %}
+
+{% macro generate_insert_hint(parallel, insert_mode) %}
+    {% if parallel and insert_mode == 'append' %}
+        /*+parallel({{ parallel }}) append*/
+    {% elif parallel %}
+        /*+parallel({{ parallel }})*/
+    {% elif insert_mode == 'append' %}
+        /*+ append */
+    {% endif %}
 {% endmacro %}
